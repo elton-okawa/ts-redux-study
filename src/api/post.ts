@@ -36,3 +36,10 @@ export const createPostData = ({
     author,
   };
 };
+
+export function serializePost(post: any) {
+  return {
+    ...post,
+    author: post.author.id,
+  };
+}

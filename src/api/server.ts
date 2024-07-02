@@ -3,11 +3,11 @@ import { factory } from '@mswjs/data';
 import { HttpResponse, http } from 'msw';
 import { setupWorker } from 'msw/browser';
 
-import { commentModel, createCommentData } from './comment';
+import { commentModel, createCommentData, serializeComment } from './comment';
 import { createErrorResponse } from './helper';
-import { Post, createPostData, postModel } from './post';
+import { Post, createPostData, postModel, serializePost } from './post';
 import { createUserData, userModel } from './user';
-import { voteModel } from './vote';
+import { serializeVote, voteModel } from './vote';
 
 const NUM_USERS = 3;
 const POSTS_PER_USER = 3;
@@ -73,11 +73,6 @@ for (const author of authors) {
   });
 }
 
-const serializePost = (post: any) => ({
-  ...post,
-  author: post.author.id,
-});
-
 /* MSW REST API Handlers */
 
 export const handlers = [
@@ -135,43 +130,111 @@ export const handlers = [
     return HttpResponse.json(serializePost(updatedPost));
   }),
 
-  // http.get('/fake-api/posts/:postId/comments', async ({ params }) => {
-  //   const post = db.post.findFirst({
-  //     where: { id: { equals: params.postId as string } },
-  //   });
-  //   if (!post) {
-  //     return createErrorResponse(`Post '${params.postId}' does not exist`, 422);
-  //   }
+  http.get('/fake-api/posts/:postId/comments', async ({ params }) => {
+    const postId = params.postId as string;
+    const post = db.post.findFirst({
+      where: { id: { equals: postId } },
+    });
 
-  //   await delay(ARTIFICIAL_DELAY_MS);
-  //   return HttpResponse.json({ comments: post.comments });
-  // }),
+    if (!post) {
+      return createErrorResponse(`Post '${postId}' does not exist`, 422);
+    }
 
-  // http.post('/fake-api/posts/:postId/votes', async ({ request, params }) => {
-  //   const postId = params.postId as string;
-  //   const { owner } = (await request.json()) as { owner: string };
-  //   const post = db.post.findFirst({
-  //     where: { id: { equals: postId } },
-  //   });
+    const comments = db.comment
+      .findMany({
+        where: { post: { id: { equals: params.postId as string } } },
+      })
+      .map(serializeComment);
 
-  //   if (!post) {
-  //     return createErrorResponse(`Post '${postId}' does not exist`, 422);
-  //   }
+    await delay(ARTIFICIAL_DELAY_MS);
+    return HttpResponse.json(comments);
+  }),
 
-  //   if (post.votes.find((vote) => vote.owner?.id === owner)) {
-  //     return createErrorResponse(`User '${owner}' already voted`, 422);
-  //   }
+  http.post('/fake-api/posts/:postId/comments', async ({ request, params }) => {
+    const postId = params.postId as string;
+    const body = (await request.json()) as { owner: string; content: string };
 
-  //   const updatedPost = db.post.update({
-  //     where: { id: { equals: postId } },
-  //     data: {
-  //       votes: [...post.votes, { owner, post }] as any,
-  //     },
-  //   });
+    const post = db.post.findFirst({
+      where: { id: { equals: postId } },
+    });
+    if (!post) {
+      return createErrorResponse(`Post '${postId}' does not exist`, 422);
+    }
 
-  //   await delay(ARTIFICIAL_DELAY_MS);
-  //   return HttpResponse.json(serializePost(updatedPost));
-  // }),
+    const owner = db.user.findFirst({
+      where: { id: { equals: body.owner } },
+    });
+    if (!owner) {
+      return createErrorResponse(`User '${body.owner}' does not exist`, 422);
+    }
+
+    const newComment = db.comment.create({
+      owner,
+      post,
+      createdAt: new Date().toISOString(),
+      content: body.content,
+    });
+
+    await delay(ARTIFICIAL_DELAY_MS);
+    return HttpResponse.json(serializeComment(newComment));
+  }),
+
+  http.get('/fake-api/posts/:postId/votes', async ({ params }) => {
+    const postId = params.postId as string;
+    const post = db.post.findFirst({
+      where: { id: { equals: postId } },
+    });
+
+    if (!post) {
+      return createErrorResponse(`Post '${postId}' does not exist`, 422);
+    }
+
+    const votes = db.vote
+      .findMany({
+        where: { post: { id: { equals: params.postId as string } } },
+      })
+      .map(serializeVote);
+
+    await delay(ARTIFICIAL_DELAY_MS);
+    return HttpResponse.json(votes);
+  }),
+
+  http.post('/fake-api/posts/:postId/votes', async ({ request, params }) => {
+    const postId = params.postId as string;
+    const body = (await request.json()) as { owner: string };
+
+    const post = db.post.findFirst({
+      where: { id: { equals: postId } },
+    });
+    if (!post) {
+      return createErrorResponse(`Post '${postId}' does not exist`, 422);
+    }
+
+    const owner = db.user.findFirst({
+      where: { id: { equals: body.owner } },
+    });
+    if (!owner) {
+      return createErrorResponse(`User '${body.owner}' does not exist`, 422);
+    }
+
+    const votes = db.vote
+      .findMany({
+        where: { post: { id: { equals: params.postId as string } } },
+      })
+      .map(serializeVote);
+
+    if (votes.find((vote) => vote.owner === owner)) {
+      return createErrorResponse(`User '${owner}' already voted`, 422);
+    }
+
+    const newVote = db.vote.create({
+      owner,
+      post,
+    });
+
+    await delay(ARTIFICIAL_DELAY_MS);
+    return HttpResponse.json(serializeVote(newVote));
+  }),
 
   http.get('/fake-api/users', async () => {
     await delay(ARTIFICIAL_DELAY_MS);

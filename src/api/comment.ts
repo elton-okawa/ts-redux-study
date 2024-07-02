@@ -37,3 +37,11 @@ export const createCommentData = ({
     post,
   };
 };
+
+export function serializeComment(comment: any) {
+  return {
+    ...comment,
+    owner: comment.owner.id,
+    post: comment.post.id,
+  };
+}

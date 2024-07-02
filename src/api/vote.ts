@@ -30,3 +30,11 @@ export const createVoteData = ({
     post,
   };
 };
+
+export function serializeVote(vote: any) {
+  return {
+    ...vote,
+    owner: vote.owner.id,
+    post: vote.post.id,
+  };
+}
