@@ -3,30 +3,37 @@ import { factory, manyOf, oneOf, primaryKey } from '@mswjs/data';
 import { nanoid } from '@reduxjs/toolkit';
 
 import { Post } from './post';
+import { User } from './user';
 
 export type Comment = {
   id: string;
   createdAt: string;
   content: string;
-  post: Post | Omit<Post, 'id'>;
+  owner: User;
+  post: Post;
 };
 
 export const commentModel = {
   id: primaryKey(nanoid),
   createdAt: String,
   content: String,
+  owner: oneOf('user'),
   post: oneOf('post'),
 };
 
 export type CreateCommentParams = {
-  post: Post | Omit<Post, 'id'>;
+  owner: User;
+  post: Post;
 };
+
 export const createCommentData = ({
+  owner,
   post,
-}: CreateCommentParams): Omit<Comment, 'id'> => {
+}: CreateCommentParams): Partial<Comment> => {
   return {
     createdAt: faker.date.past().toISOString(),
     content: faker.lorem.paragraph(),
+    owner,
     post,
   };
 };

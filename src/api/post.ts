@@ -12,8 +12,6 @@ export type Post = {
   createdAt: string;
   content: string;
   author: User;
-  comments: Comment[];
-  votes: Vote[];
 };
 
 export const postModel = {
@@ -22,27 +20,19 @@ export const postModel = {
   createdAt: String,
   content: String,
   author: oneOf('user'),
-  comments: manyOf('comment'),
-  votes: manyOf('vote'),
 };
 
 export type CreatePostParams = {
   author: User;
-  votes: Vote[];
-  comments: Comment[];
 };
 
 export const createPostData = ({
   author,
-  votes,
-  comments,
 }: CreatePostParams): Omit<Post, 'id'> => {
   return {
     title: faker.lorem.words(),
     content: faker.lorem.paragraph(),
     createdAt: faker.date.past().toISOString(),
     author,
-    votes,
-    comments,
   };
 };

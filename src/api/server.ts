@@ -43,6 +43,10 @@ if (useSeededRNG) {
   faker.seed(seedDate.getTime());
 }
 
+function randomItem<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
 /* MSW Data Model Setup */
 
 export const db = factory({
@@ -52,25 +56,26 @@ export const db = factory({
   vote: voteModel,
 });
 
-// const authors = Array(NUM_USERS).map(() => db.user.create(createUserData()));
-// for (const author of authors) {
-//   const posts = Array(POSTS_PER_USER).map(() => {
-//     const post = db.post.create(
-//       createPostData({ author, comments: [], votes: [] }),
-//     );
-//     const comments = Array(COMMENTS_PER_POST).map(() => {
-//       return db.comment.create(createCommentData({ post }));
-//     });
-//     return db.post.create({
-//       ...post,
-//       comments,
-//     });
-//   });
-// }
+const authors = Array.from({ length: NUM_USERS }).map(() =>
+  db.user.create(createUserData()),
+);
+for (const author of authors) {
+  Array.from({ length: POSTS_PER_USER }).map(() => {
+    const post = db.post.create(createPostData({ author }));
+    Array.from({ length: COMMENTS_PER_POST }).map(() => {
+      return db.comment.create(
+        createCommentData({ owner: randomItem(authors), post: post as any }),
+      );
+    });
+
+    if (Math.random() > 0.5)
+      db.vote.create({ owner: randomItem(authors), post });
+  });
+}
 
 const serializePost = (post: any) => ({
   ...post,
-  user: post.author.id,
+  author: post.author.id,
 });
 
 /* MSW REST API Handlers */
@@ -130,43 +135,43 @@ export const handlers = [
     return HttpResponse.json(serializePost(updatedPost));
   }),
 
-  http.get('/fake-api/posts/:postId/comments', async ({ params }) => {
-    const post = db.post.findFirst({
-      where: { id: { equals: params.postId as string } },
-    });
-    if (!post) {
-      return createErrorResponse(`Post '${params.postId}' does not exist`, 422);
-    }
+  // http.get('/fake-api/posts/:postId/comments', async ({ params }) => {
+  //   const post = db.post.findFirst({
+  //     where: { id: { equals: params.postId as string } },
+  //   });
+  //   if (!post) {
+  //     return createErrorResponse(`Post '${params.postId}' does not exist`, 422);
+  //   }
 
-    await delay(ARTIFICIAL_DELAY_MS);
-    return HttpResponse.json({ comments: post.comments });
-  }),
+  //   await delay(ARTIFICIAL_DELAY_MS);
+  //   return HttpResponse.json({ comments: post.comments });
+  // }),
 
-  http.post('/fake-api/posts/:postId/votes', async ({ request, params }) => {
-    const postId = params.postId as string;
-    const { owner } = (await request.json()) as { owner: string };
-    const post = db.post.findFirst({
-      where: { id: { equals: postId } },
-    });
+  // http.post('/fake-api/posts/:postId/votes', async ({ request, params }) => {
+  //   const postId = params.postId as string;
+  //   const { owner } = (await request.json()) as { owner: string };
+  //   const post = db.post.findFirst({
+  //     where: { id: { equals: postId } },
+  //   });
 
-    if (!post) {
-      return createErrorResponse(`Post '${postId}' does not exist`, 422);
-    }
+  //   if (!post) {
+  //     return createErrorResponse(`Post '${postId}' does not exist`, 422);
+  //   }
 
-    if (post.votes.find((vote) => vote.owner?.id === owner)) {
-      return createErrorResponse(`User '${owner}' already voted`, 422);
-    }
+  //   if (post.votes.find((vote) => vote.owner?.id === owner)) {
+  //     return createErrorResponse(`User '${owner}' already voted`, 422);
+  //   }
 
-    const updatedPost = db.post.update({
-      where: { id: { equals: postId } },
-      data: {
-        votes: [...post.votes, { owner, post }] as any,
-      },
-    });
+  //   const updatedPost = db.post.update({
+  //     where: { id: { equals: postId } },
+  //     data: {
+  //       votes: [...post.votes, { owner, post }] as any,
+  //     },
+  //   });
 
-    await delay(ARTIFICIAL_DELAY_MS);
-    return HttpResponse.json(serializePost(updatedPost));
-  }),
+  //   await delay(ARTIFICIAL_DELAY_MS);
+  //   return HttpResponse.json(serializePost(updatedPost));
+  // }),
 
   http.get('/fake-api/users', async () => {
     await delay(ARTIFICIAL_DELAY_MS);
