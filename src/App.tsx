@@ -1,5 +1,11 @@
+import { PostList } from './features/posts/PostList';
+
 export function App() {
-  return <p className='text-center'>Hello world!</p>;
+  return (
+    <main>
+      <PostList />
+    </main>
+  );
 }
 
 export default App;
