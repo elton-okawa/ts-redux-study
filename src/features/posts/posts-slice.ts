@@ -4,13 +4,16 @@ import { RootState } from '@/src/app/store';
 
 import { apiSlice } from '../api/api-slice';
 
-export type Post = {
+export type PostSummary = {
   id: string;
+  title: string;
+  createdAt: string;
+  author: string;
 };
 
-export type PostResponse = Post[];
+export type PostResponse = PostSummary[];
 
-const postsAdapter = createEntityAdapter<Post>();
+const postsAdapter = createEntityAdapter<PostSummary>();
 const initialState = postsAdapter.getInitialState();
 
 export const extendedSlice = apiSlice.injectEndpoints({

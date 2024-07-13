@@ -1,8 +1,6 @@
 import { faker } from '@faker-js/faker';
-import { factory, manyOf, oneOf, primaryKey } from '@mswjs/data';
+import { primaryKey } from '@mswjs/data';
 import { nanoid } from '@reduxjs/toolkit';
-
-import { Post } from './post';
 
 export type User = {
   id: string;

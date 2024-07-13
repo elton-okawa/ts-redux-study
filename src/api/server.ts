@@ -5,7 +5,13 @@ import { setupWorker } from 'msw/browser';
 
 import { commentModel, createCommentData, serializeComment } from './comment';
 import { createErrorResponse } from './helper';
-import { Post, createPostData, postModel, serializePost } from './post';
+import {
+  Post,
+  createPostData,
+  postModel,
+  serializePostDetail,
+  serializePostSummary,
+} from './post';
 import { createUserData, userModel } from './user';
 import { serializeVote, voteModel } from './vote';
 
@@ -77,7 +83,7 @@ for (const author of authors) {
 
 export const handlers = [
   http.get('/fake-api/posts', async function () {
-    const posts = db.post.getAll().map(serializePost);
+    const posts = db.post.getAll().map(serializePostSummary);
     await delay(ARTIFICIAL_DELAY_MS);
     return HttpResponse.json(posts);
   }),
@@ -105,7 +111,7 @@ export const handlers = [
       createdAt: new Date().toISOString(),
     });
     await delay(ARTIFICIAL_DELAY_MS);
-    return HttpResponse.json(serializePost(post));
+    return HttpResponse.json(serializePostSummary(post));
   }),
 
   http.get('/fake-api/posts/:postId', async function ({ params }) {
@@ -113,7 +119,7 @@ export const handlers = [
       where: { id: { equals: params.postId as string } },
     });
     await delay(ARTIFICIAL_DELAY_MS);
-    return HttpResponse.json(serializePost(post));
+    return HttpResponse.json(serializePostDetail(post));
   }),
 
   http.patch('/fake-api/posts/:postId', async ({ request, params }) => {
@@ -127,7 +133,7 @@ export const handlers = [
       data,
     });
     await delay(ARTIFICIAL_DELAY_MS);
-    return HttpResponse.json(serializePost(updatedPost));
+    return HttpResponse.json(serializePostSummary(updatedPost));
   }),
 
   http.get('/fake-api/posts/:postId/comments', async ({ params }) => {

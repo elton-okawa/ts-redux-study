@@ -10,8 +10,13 @@ export const PostList: React.FC = () => {
 
   return (
     <section className='container'>
+      <h1>Posts</h1>
       {posts.map((post) => (
-        <div key={post.id}>{post.id}</div>
+        <div key={post.id}>
+          <h2>{post.title}</h2>
+          <p>{new Date(post.createdAt).toLocaleDateString()}</p>
+          <p>{post.author}</p>
+        </div>
       ))}
     </section>
   );

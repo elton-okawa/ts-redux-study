@@ -1,10 +1,8 @@
 import { faker } from '@faker-js/faker';
-import { factory, manyOf, oneOf, primaryKey } from '@mswjs/data';
+import { oneOf, primaryKey } from '@mswjs/data';
 import { nanoid } from '@reduxjs/toolkit';
 
-import { Comment } from './comment';
 import { User } from './user';
-import { Vote } from './vote';
 
 export type Post = {
   id: string;
@@ -37,9 +35,18 @@ export const createPostData = ({
   };
 };
 
-export function serializePost(post: any) {
+export function serializePostSummary(post: any) {
   return {
-    ...post,
+    id: post.id,
+    title: post.title,
+    createdAt: post.createdAt,
     author: post.author.id,
+  };
+}
+
+export function serializePostDetail(post: any) {
+  return {
+    ...serializePostSummary(post),
+    content: post.content,
   };
 }
