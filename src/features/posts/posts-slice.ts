@@ -11,6 +11,10 @@ export type PostSummary = {
   author: string;
 };
 
+export type PostDetails = PostSummary & {
+  content: string;
+};
+
 export type PostResponse = PostSummary[];
 
 const postsAdapter = createEntityAdapter<PostSummary>();
@@ -23,9 +27,12 @@ export const extendedSlice = apiSlice.injectEndpoints({
       transformResponse: (res: PostResponse) =>
         postsAdapter.setAll(initialState, res),
     }),
+    getPost: builder.query<PostDetails, string>({
+      query: (id) => `/posts/${id}`,
+    }),
   }),
 });
-export const { useGetPostsQuery } = extendedSlice;
+export const { useGetPostsQuery, useGetPostQuery } = extendedSlice;
 
 export const selectPostsResult = extendedSlice.endpoints.getPosts.select();
 export const selectPostsData = createSelector(

@@ -119,6 +119,10 @@ export const handlers = [
       where: { id: { equals: params.postId as string } },
     });
     await delay(ARTIFICIAL_DELAY_MS);
+
+    if (!post) {
+      return HttpResponse.json({ message: 'Not found' }, { status: 404 });
+    }
     return HttpResponse.json(serializePostDetail(post));
   }),
 

@@ -9,7 +9,8 @@ export const Component: React.FC = () => {
   return (
     <>
       <NavBar />
-      <PostDetails id={id} />
+      {id && <PostDetails id={id} />}
+      {!id && 'Not Found'}
     </>
   );
 };
