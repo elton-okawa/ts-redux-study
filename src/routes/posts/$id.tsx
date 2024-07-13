@@ -1,7 +1,15 @@
 import { useParams } from 'react-router-dom';
 
+import { NavBar } from '@/src/components/NavBar';
+import { PostDetails } from '@/src/features/posts/PostDetails';
+
 export const Component: React.FC = () => {
   const { id } = useParams();
 
-  return <p>{id}</p>;
+  return (
+    <>
+      <NavBar />
+      <PostDetails id={id} />
+    </>
+  );
 };

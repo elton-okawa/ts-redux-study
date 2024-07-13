@@ -6,8 +6,7 @@ import { router } from './routes';
 
 export function App() {
   return (
-    <main>
-      <NavBar />
+    <main className='bg-gray-200'>
       <Suspense fallback={<div>Loading...</div>}>
         <RouterProvider router={router} />
       </Suspense>
