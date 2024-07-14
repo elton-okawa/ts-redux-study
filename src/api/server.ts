@@ -83,7 +83,9 @@ for (const author of authors) {
 
 export const handlers = [
   http.get('/fake-api/posts', async function () {
-    const posts = db.post.getAll().map(serializePostSummary);
+    const posts = db.post
+      .findMany({ orderBy: { createdAt: 'desc' } })
+      .map(serializePostSummary);
     await delay(ARTIFICIAL_DELAY_MS);
     return HttpResponse.json(posts);
   }),
@@ -97,7 +99,7 @@ export const handlers = [
     if (Math.random() >= 0.5) {
       await delay(ARTIFICIAL_DELAY_MS);
 
-      return createErrorResponse('Server error saving this post!', 500);
+      return createErrorResponse('Mocked error: cannot save post', 500);
     }
 
     const user = db.user.findFirst({ where: { id: { equals: data.author } } });
