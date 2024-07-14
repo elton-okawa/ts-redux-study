@@ -6,8 +6,10 @@ export const Component: React.FC = () => {
   return (
     <>
       <NavBar />
-      <PostForm />
-      <PostList />
+      <div className='max-w-md px-10 mx-auto'>
+        <PostForm />
+        <PostList />
+      </div>
     </>
   );
 };
