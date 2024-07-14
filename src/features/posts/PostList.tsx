@@ -1,19 +1,31 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { useAppSelector } from '@/src/app/hooks';
+import { useAppDispatch, useAppSelector } from '@/src/app/hooks';
 
-import { selectAllPosts, useGetPostsQuery } from './posts-slice';
+import { fetchPaginatedPosts, selectPosts } from './posts-slice';
 
 export const PostList: React.FC = () => {
-  const { isLoading } = useGetPostsQuery();
-  const posts = useAppSelector(selectAllPosts);
+  const dispatch = useAppDispatch();
 
-  if (isLoading) return <p>Loading...</p>;
+  const { isLoading, data } = useAppSelector(selectPosts);
+
+  useEffect(() => {
+    const promise = dispatch(fetchPaginatedPosts());
+    return () => promise.abort();
+  }, [dispatch]);
+
+  const loadMore = () => {
+    dispatch(fetchPaginatedPosts({ cursor: data?.next }));
+  };
+
+  if (isLoading || !data) return <p>Loading...</p>;
+  const hasNext = data.count > data.results.length;
 
   return (
     <section className='container m-auto flex flex-col gap-4'>
       <h1>Posts</h1>
-      {posts.map((post) => (
+      {data.results.map((post) => (
         <div key={post.id} className='gap-4 rounded-md shadow-md bg-gray-50'>
           <h2>{post.title}</h2>
           <p>{new Date(post.createdAt).toLocaleDateString()}</p>
@@ -23,6 +35,9 @@ export const PostList: React.FC = () => {
           </Link>
         </div>
       ))}
+      <button onClick={loadMore} disabled={!hasNext}>
+        Load more
+      </button>
     </section>
   );
 };

@@ -82,12 +82,23 @@ for (const author of authors) {
 /* MSW REST API Handlers */
 
 export const handlers = [
-  http.get('/fake-api/posts', async function () {
+  http.get('/fake-api/posts', async function ({ request }) {
+    const url = new URL(request.url);
+    const cursor = url.searchParams.get('cursor');
+    const pageSize = url.searchParams.has('pageSize')
+      ? parseInt(url.searchParams.get('pageSize')!)
+      : 6;
+
     const posts = db.post
-      .findMany({ orderBy: { createdAt: 'desc' } })
+      .findMany({ orderBy: { createdAt: 'desc' }, take: pageSize, cursor })
       .map(serializePostSummary);
+    const count = db.post.count();
     await delay(ARTIFICIAL_DELAY_MS);
-    return HttpResponse.json(posts);
+    return HttpResponse.json({
+      count,
+      next: posts[posts.length - 1].id,
+      results: posts,
+    });
   }),
   http.post('/fake-api/posts', async function ({ request }) {
     const data = (await request.json()) as {
