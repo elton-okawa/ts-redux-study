@@ -66,20 +66,31 @@ export const extendedSlice = apiSlice.injectEndpoints({
         url: '/posts',
         body: data,
       }),
+      onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          dispatch(clearPosts());
+          dispatch(fetchPaginatedPosts());
+        } catch (error) {
+          // TODO handle error
+          console.error(error);
+        }
+      },
     }),
   }),
 });
 export const { useGetPostsQuery, useGetPostQuery, useNewPostMutation } =
   extendedSlice;
 
+export type PaginationParams = {
+  cursor?: string;
+  pageSize?: number;
+};
 // RTK Query does not have infinite scroll implemented
 // https://github.com/reduxjs/redux-toolkit/discussions/3174
 export const fetchPaginatedPosts = createAsyncThunk(
   'posts/fetchPaginatedPosts',
-  async ({
-    cursor,
-    pageSize = 2,
-  }: { cursor?: string; pageSize?: number } = {}) => {
+  async ({ cursor, pageSize = 2 }: PaginationParams | void = {}) => {
     const { data } = await client.get<PostResponse>('/posts', {
       params: { cursor, pageSize },
     });
@@ -96,14 +107,25 @@ export type PostsSliceState = {
     results: PostSummary[];
   } | null;
 };
+
+const initialState: PostsSliceState = {
+  data: null,
+  status: 'idle',
+};
+
 export const postsSlice = createSlice({
   name: 'posts',
-  initialState: {
-    data: null,
-    status: 'idle',
-  } satisfies PostsSliceState as PostsSliceState,
-  reducers: {},
+  initialState,
+  reducers: {
+    clearPosts: () => initialState,
+  },
   extraReducers: (builder) => {
+    builder.addCase(fetchPaginatedPosts.pending, (state) => {
+      state.status = 'loading';
+    });
+    builder.addCase(fetchPaginatedPosts.rejected, (state) => {
+      state.status = 'error';
+    });
     builder.addCase(fetchPaginatedPosts.fulfilled, (state, action) => {
       state.status = 'idle';
       state.data = {
@@ -125,3 +147,4 @@ export const selectPosts = createSelector(
 );
 
 export const postsReducer = postsSlice.reducer;
+export const { clearPosts } = postsSlice.actions;

@@ -8,7 +8,7 @@ import { fetchPaginatedPosts, selectPosts } from './posts-slice';
 export const PostList: React.FC = () => {
   const dispatch = useAppDispatch();
 
-  const { isLoading, data } = useAppSelector(selectPosts);
+  const { data } = useAppSelector(selectPosts);
 
   useEffect(() => {
     const promise = dispatch(fetchPaginatedPosts());
@@ -19,7 +19,7 @@ export const PostList: React.FC = () => {
     dispatch(fetchPaginatedPosts({ cursor: data?.next }));
   };
 
-  if (isLoading || !data) return <p>Loading...</p>;
+  if (!data) return <p>Loading...</p>;
   const hasNext = data.count > data.results.length;
 
   return (

@@ -107,7 +107,7 @@ export const handlers = [
       author: string;
     };
 
-    if (Math.random() >= 0.5) {
+    if (data.title === 'error') {
       await delay(ARTIFICIAL_DELAY_MS);
 
       return createErrorResponse('Mocked error: cannot save post', 500);
