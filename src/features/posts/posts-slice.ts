@@ -11,6 +11,7 @@ import { TagType, apiSlice, client } from '../api/api-slice';
 export type PostSummary = {
   id: string;
   title: string;
+  summary: string;
   createdAt: string;
   author: string;
 };

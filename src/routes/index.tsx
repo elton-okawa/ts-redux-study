@@ -6,7 +6,7 @@ export const Component: React.FC = () => {
   return (
     <>
       <NavBar />
-      <div className='max-w-md px-10 mx-auto'>
+      <div className='flex flex-col gap-4 max-w-lg px-10 mx-auto'>
         <PostForm />
         <PostList />
       </div>
