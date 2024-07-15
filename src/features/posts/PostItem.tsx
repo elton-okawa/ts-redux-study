@@ -12,7 +12,6 @@ export type PostItemProps = {
 export const PostItem: React.FC<PostItemProps> = ({ post, delay }) => {
   return (
     <Link
-      key={post.id}
       to={`posts/${post.id}`}
       className='text-primary-500 hover:text-primary-300'
     >
