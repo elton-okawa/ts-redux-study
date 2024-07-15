@@ -98,6 +98,12 @@ export const fetchPaginatedPosts = createAsyncThunk(
 
     return data;
   },
+  {
+    condition: (_, { getState }) => {
+      const { posts } = getState() as RootState;
+      return posts.status !== 'loading';
+    },
+  },
 );
 
 export type PostsSliceState = {

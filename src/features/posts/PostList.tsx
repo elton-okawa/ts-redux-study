@@ -19,8 +19,7 @@ export const PostList: React.FC = () => {
   }, [data?.next, dispatch]);
 
   useEffect(() => {
-    const promise = dispatch(fetchPaginatedPosts({ pageSize: PAGE_SIZE }));
-    return () => promise.abort();
+    dispatch(fetchPaginatedPosts({ pageSize: PAGE_SIZE }));
   }, [dispatch]);
 
   if (!data) return <p>Loading...</p>;
