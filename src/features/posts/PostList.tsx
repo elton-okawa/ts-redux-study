@@ -19,8 +19,11 @@ export const PostList: React.FC = () => {
   }, [data?.next, dispatch]);
 
   useEffect(() => {
-    dispatch(fetchPaginatedPosts({ pageSize: PAGE_SIZE }));
-  }, [dispatch]);
+    // skip first request when we already have some cached data
+    if (!data?.next) {
+      dispatch(fetchPaginatedPosts({ pageSize: PAGE_SIZE }));
+    }
+  }, [dispatch, data?.next]);
 
   if (!data) return <p>Loading...</p>;
 
