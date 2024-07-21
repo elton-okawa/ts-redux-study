@@ -1,14 +1,15 @@
 import { faker } from '@faker-js/faker';
-import { factory, manyOf, oneOf, primaryKey } from '@mswjs/data';
+import { oneOf, primaryKey } from '@mswjs/data';
 import { nanoid } from '@reduxjs/toolkit';
 
-import { Comment } from './comment';
+import { capitalize } from '@/src/lib/string';
+
 import { User } from './user';
-import { Vote } from './vote';
 
 export type Post = {
   id: string;
   title: string;
+  summary: string;
   createdAt: string;
   content: string;
   author: User;
@@ -17,6 +18,7 @@ export type Post = {
 export const postModel = {
   id: primaryKey(nanoid),
   title: String,
+  summary: String,
   createdAt: String,
   content: String,
   author: oneOf('user'),
@@ -30,16 +32,27 @@ export const createPostData = ({
   author,
 }: CreatePostParams): Omit<Post, 'id'> => {
   return {
-    title: faker.lorem.words(),
-    content: faker.lorem.paragraph(),
+    title: faker.lorem.words().split(' ').map(capitalize).join(' '),
+    summary: faker.lorem.paragraph(),
+    content: faker.lorem.paragraph({ min: 3, max: 10 }),
     createdAt: faker.date.past().toISOString(),
     author,
   };
 };
 
-export function serializePost(post: any) {
+export function serializePostSummary(post: any) {
   return {
-    ...post,
+    id: post.id,
+    title: post.title,
+    summary: post.summary,
+    createdAt: post.createdAt,
     author: post.author.id,
+  };
+}
+
+export function serializePostDetail(post: any) {
+  return {
+    ...serializePostSummary(post),
+    content: post.content,
   };
 }

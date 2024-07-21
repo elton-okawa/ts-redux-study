@@ -5,7 +5,13 @@ import { setupWorker } from 'msw/browser';
 
 import { commentModel, createCommentData, serializeComment } from './comment';
 import { createErrorResponse } from './helper';
-import { Post, createPostData, postModel, serializePost } from './post';
+import {
+  Post,
+  createPostData,
+  postModel,
+  serializePostDetail,
+  serializePostSummary,
+} from './post';
 import { createUserData, userModel } from './user';
 import { serializeVote, voteModel } from './vote';
 
@@ -76,10 +82,23 @@ for (const author of authors) {
 /* MSW REST API Handlers */
 
 export const handlers = [
-  http.get('/fake-api/posts', async function () {
-    const posts = db.post.getAll().map(serializePost);
+  http.get('/fake-api/posts', async function ({ request }) {
+    const url = new URL(request.url);
+    const cursor = url.searchParams.get('cursor');
+    const pageSize = url.searchParams.has('pageSize')
+      ? parseInt(url.searchParams.get('pageSize')!)
+      : 6;
+
+    const posts = db.post
+      .findMany({ orderBy: { createdAt: 'desc' }, take: pageSize, cursor })
+      .map(serializePostSummary);
+    const count = db.post.count();
     await delay(ARTIFICIAL_DELAY_MS);
-    return HttpResponse.json(posts);
+    return HttpResponse.json({
+      count,
+      next: posts[posts.length - 1].id,
+      results: posts,
+    });
   }),
   http.post('/fake-api/posts', async function ({ request }) {
     const data = (await request.json()) as {
@@ -88,10 +107,10 @@ export const handlers = [
       author: string;
     };
 
-    if (Math.random() >= 0.5) {
+    if (data.title === 'error') {
       await delay(ARTIFICIAL_DELAY_MS);
 
-      return createErrorResponse('Server error saving this post!', 500);
+      return createErrorResponse('Mocked error: cannot save post', 500);
     }
 
     const user = db.user.findFirst({ where: { id: { equals: data.author } } });
@@ -105,7 +124,7 @@ export const handlers = [
       createdAt: new Date().toISOString(),
     });
     await delay(ARTIFICIAL_DELAY_MS);
-    return HttpResponse.json(serializePost(post));
+    return HttpResponse.json(serializePostSummary(post));
   }),
 
   http.get('/fake-api/posts/:postId', async function ({ params }) {
@@ -113,7 +132,11 @@ export const handlers = [
       where: { id: { equals: params.postId as string } },
     });
     await delay(ARTIFICIAL_DELAY_MS);
-    return HttpResponse.json(serializePost(post));
+
+    if (!post) {
+      return HttpResponse.json({ message: 'Not found' }, { status: 404 });
+    }
+    return HttpResponse.json(serializePostDetail(post));
   }),
 
   http.patch('/fake-api/posts/:postId', async ({ request, params }) => {
@@ -127,7 +150,7 @@ export const handlers = [
       data,
     });
     await delay(ARTIFICIAL_DELAY_MS);
-    return HttpResponse.json(serializePost(updatedPost));
+    return HttpResponse.json(serializePostSummary(updatedPost));
   }),
 
   http.get('/fake-api/posts/:postId/comments', async ({ params }) => {
