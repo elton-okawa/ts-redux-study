@@ -3,7 +3,7 @@ import { oneOf, primaryKey } from '@mswjs/data';
 
 import { capitalize } from '@/src/lib/string';
 
-import { User } from './user';
+import { User } from '../users/user';
 
 export type Post = {
   id: string;

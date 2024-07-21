@@ -3,7 +3,7 @@ import { factory, manyOf, oneOf, primaryKey } from '@mswjs/data';
 import { nanoid } from '@reduxjs/toolkit';
 
 import { Post } from './post';
-import { User } from './user';
+import { User } from './users/user';
 
 export type Comment = {
   id: string;

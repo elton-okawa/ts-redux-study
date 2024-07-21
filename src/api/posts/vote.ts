@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
 import { oneOf, primaryKey } from '@mswjs/data';
 
-import { Post } from './post';
-import { User } from './user';
+import { Post } from './posts/post';
+import { User } from './users/user';
 
 export type Vote = {
   id: string;
