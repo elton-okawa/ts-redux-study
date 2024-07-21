@@ -5,6 +5,11 @@ export type UserSummary = {
   name: string;
 };
 
+export type UserDetails = {
+  id: string;
+  name: string;
+};
+
 const extendedSlice = apiSlice.injectEndpoints({
   endpoints: (build) => ({
     getUsers: build.query<UserSummary[], void>({

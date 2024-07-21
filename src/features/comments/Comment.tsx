@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { User } from '../users/User';
 import { CommentModel } from './comments-slice';
 
 export type CommentProps = {
@@ -10,7 +11,7 @@ export const Comment: React.FC<CommentProps> = ({ comment }) => {
   return (
     <div>
       <div className='flex flex-row justify-between'>
-        <p className='font-semibold'>{comment.owner}</p>
+        <User id={comment.owner} />
         <p className='text-gray-400'>
           {new Date(comment.createdAt).toLocaleString()}
         </p>
