@@ -1,5 +1,6 @@
 import { useGetUserQuery } from '@/src/features/users/users-slice';
 
+import { Comments } from '../comments/Comments';
 import { useGetPostQuery } from './posts-slice';
 
 export type PostDetailsProps = {
@@ -25,6 +26,7 @@ export const PostDetails: React.FC<PostDetailsProps> = ({ id }) => {
         </p>
       </div>
       <p>{post.content}</p>
+      <Comments postId={id} />
     </div>
   );
 };

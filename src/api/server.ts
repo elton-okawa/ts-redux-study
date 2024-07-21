@@ -36,7 +36,7 @@ if (useSeededRNG) {
 }
 
 function randomItem<T>(array: T[]): T {
-  return array[faker.number.int({ min: 0, max: array.length })];
+  return array[faker.number.int({ min: 0, max: array.length - 1 })];
 }
 
 /* MSW Data Model Setup */
