@@ -10,7 +10,10 @@ const extendedSlice = apiSlice.injectEndpoints({
     getUsers: build.query<UserSummary[], void>({
       query: () => 'users',
     }),
+    getUser: build.query<UserSummary, string>({
+      query: (id) => `users/${id}`,
+    }),
   }),
 });
 
-export const { useGetUsersQuery } = extendedSlice;
+export const { useGetUsersQuery, useGetUserQuery } = extendedSlice;

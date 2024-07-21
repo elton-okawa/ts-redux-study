@@ -9,8 +9,10 @@ export const Component: React.FC = () => {
   return (
     <>
       <NavBar />
-      {id && <PostDetails id={id} />}
-      {!id && 'Not Found'}
+      <div className='flex flex-col max-w-lg m-auto'>
+        {id && <PostDetails id={id} />}
+        {!id && 'Not Found'}
+      </div>
     </>
   );
 };
