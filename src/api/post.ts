@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 import { oneOf, primaryKey } from '@mswjs/data';
-import { nanoid } from '@reduxjs/toolkit';
 
 import { capitalize } from '@/src/lib/string';
 
@@ -16,7 +15,7 @@ export type Post = {
 };
 
 export const postModel = {
-  id: primaryKey(nanoid),
+  id: primaryKey(faker.string.nanoid),
   title: String,
   summary: String,
   createdAt: String,
@@ -28,9 +27,7 @@ export type CreatePostParams = {
   author: User;
 };
 
-export const createPostData = ({
-  author,
-}: CreatePostParams): Omit<Post, 'id'> => {
+export const createPostData = ({ author }: CreatePostParams): Partial<Post> => {
   return {
     title: faker.lorem.words().split(' ').map(capitalize).join(' '),
     summary: faker.lorem.paragraph(),

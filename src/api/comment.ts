@@ -14,7 +14,7 @@ export type Comment = {
 };
 
 export const commentModel = {
-  id: primaryKey(nanoid),
+  id: primaryKey(faker.string.nanoid),
   createdAt: String,
   content: String,
   owner: oneOf('user'),

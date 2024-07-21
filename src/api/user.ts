@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 import { primaryKey } from '@mswjs/data';
-import { nanoid } from '@reduxjs/toolkit';
 
 export type User = {
   id: string;
@@ -8,7 +7,7 @@ export type User = {
 };
 
 export const userModel = {
-  id: primaryKey(nanoid),
+  id: primaryKey(faker.string.nanoid),
   name: String,
 };
 

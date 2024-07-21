@@ -1,5 +1,5 @@
-import { factory, manyOf, oneOf, primaryKey } from '@mswjs/data';
-import { nanoid } from '@reduxjs/toolkit';
+import { faker } from '@faker-js/faker';
+import { oneOf, primaryKey } from '@mswjs/data';
 
 import { Post } from './post';
 import { User } from './user';
@@ -11,7 +11,7 @@ export type Vote = {
 };
 
 export const voteModel = {
-  id: primaryKey(nanoid),
+  id: primaryKey(faker.string.nanoid),
   owner: oneOf('user'),
   post: oneOf('post'),
 };

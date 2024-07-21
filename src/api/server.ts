@@ -6,7 +6,6 @@ import { setupWorker } from 'msw/browser';
 import { commentModel, createCommentData, serializeComment } from './comment';
 import { createErrorResponse } from './helper';
 import {
-  Post,
   createPostData,
   postModel,
   serializePostDetail,
@@ -50,7 +49,7 @@ if (useSeededRNG) {
 }
 
 function randomItem<T>(array: T[]): T {
-  return array[Math.floor(Math.random() * array.length)];
+  return array[faker.number.int({ min: 0, max: array.length })];
 }
 
 /* MSW Data Model Setup */
@@ -74,7 +73,7 @@ for (const author of authors) {
       );
     });
 
-    if (Math.random() > 0.5)
+    if (faker.number.float() > 0.5)
       db.vote.create({ owner: randomItem(authors), post });
   });
 }
